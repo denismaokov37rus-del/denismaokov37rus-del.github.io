@@ -2198,6 +2198,7 @@
         let board, score, best = 0,
             current, next, curX, curY, gameOver, paused, loopId, linesTotal, CELL, combo = 0,
             comboMiss = 0,
+            level = 1,
             prevLevel = 1;
         const COMBO_FILL_TARGET = 7;
         const COMBO_BOOST_MS = 60000;
@@ -2986,11 +2987,12 @@
                     $id('best').textContent = best;
                     checkAchievements();
 
-                    const newLevel = Math.floor(linesTotal / 10) + 1;
-                    $id('level-val').textContent = newLevel;
-                    if (newLevel > prevLevel) {
-                        showLevelUp(newLevel);
-                        prevLevel = newLevel;
+                    const oldLevel = level;
+                    level = Math.floor(linesTotal / 10) + 1;
+                    $id('level-val').textContent = level;
+                    if (level > oldLevel) {
+                        showLevelUp(level);
+                        prevLevel = level;
                         checkAchievements();
                         const a = document.getElementById('app');
                         a.classList.remove('level-bg');
@@ -3358,6 +3360,7 @@
             paused = false;
             combo = 0;
             comboMiss = 0;
+            level = 1;
             prevLevel = 1;
             dropPaused = false;
             $id('score-display').textContent = '0';
