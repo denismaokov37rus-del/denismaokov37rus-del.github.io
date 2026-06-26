@@ -121,18 +121,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:
 @keyframes msgpulse{0%{transform:scale(0.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 
 /* Управление */
-#ctrl-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;width:100%;max-width:280px;flex-shrink:0}
-.cbtn{
-  padding:11px 0;border-radius:10px;font-size:18px;cursor:pointer;
-  border:1px solid var(--border);background:var(--panel);color:var(--text);
-  transition:transform 0.08s,background 0.08s;
-  position:relative;overflow:hidden;
+#rotate-btn{
+  position:fixed;right:14px;bottom:40px;
+  width:70px;height:70px;border-radius:50%;
+  font-size:28px;cursor:pointer;
+  border:2px solid var(--accent);
+  background:linear-gradient(135deg,#6c63d4,#9f77ee);
+  color:#fff;z-index:50;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(127,119,221,0.5);
+  transition:transform 0.08s,box-shadow 0.08s;
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
 }
-.cbtn:active{transform:scale(0.90);background:#1e1e2e}
-.cbtn.ripple-anim::after{
+#rotate-btn:active{transform:scale(0.88);box-shadow:0 0 10px rgba(127,119,221,0.3)}
+#rotate-btn.ripple-anim::after{
   content:'';position:absolute;
-  border-radius:50%;background:rgba(127,119,221,0.35);
-  width:80px;height:80px;margin-top:-40px;margin-left:-40px;
+  border-radius:50%;background:rgba(255,255,255,0.3);
+  width:100px;height:100px;margin-top:-50px;margin-left:-50px;
   top:50%;left:50%;
   animation:ripple 0.35s ease-out forwards;
 }
@@ -315,13 +322,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:
     </div>
     <div id="msg"></div>
     <div id="streak-bar"><div id="streak-fill"></div></div>
-    <div id="ctrl-row">
-      <button class="cbtn" id="cbtn-rotate">↻</button>
-      <button class="cbtn" id="cbtn-left">◀</button>
-      <button class="cbtn" id="cbtn-drop">▼</button>
-      <button class="cbtn" id="cbtn-right">▶</button>
-    </div>
   </div>
+
+  <button id="rotate-btn">↻</button>
 
   <div class="screen hidden" id="screen-pause">
     <div class="pause-title">Пауза</div>
@@ -370,7 +373,7 @@ const PIECES=[
 
 let board,score,best=0,current,next,curX,curY,gameOver,paused,loopId,linesTotal,CELL,combo=0,prevLevel=1;
 
-// ── Частицы ──────────────────────────────────────────────────────────
+// ── Частицы ──────────────────────────────────────────────────────────────────
 const fxCanvas=document.getElementById('fx-canvas');
 const fxCtx=fxCanvas.getContext('2d');
 let particles=[];
@@ -425,7 +428,7 @@ function fxLoop(){
   else{fxRaf=null}
 }
 
-// ── Плавающий счёт (legacy, используется только в game-over) ─────────────────────────────────
+// ── Плавающий счёт (legacy, используется только в game-over) ─────────────────────────────────────────
 function showScorePopup(points,x,y,big){
   const el=document.createElement('div');
   el.className='score-popup'+(big?' mega':'');
@@ -435,14 +438,14 @@ function showScorePopup(points,x,y,big){
   setTimeout(()=>el.remove(),1200);
 }
 
-// ── Вспышка доски ──────────────────────────────────────────────────────
+// ── Вспышка доски ─────────────────────────────────────────────────────────────
 function flashBoard(cls,ms){
   const b=document.getElementById('board');
   b.classList.add(cls);
   setTimeout(()=>b.classList.remove(cls),ms);
 }
 
-// ── Пульс счёта ────────────────────────────────────────────────────────
+// ── Пульс счёта ───────────────────────────────────────────────────────────────
 function popScore(){
   const el=document.getElementById('score-display');
   el.classList.remove('pop');
@@ -451,10 +454,10 @@ function popScore(){
   setTimeout(()=>el.classList.remove('pop'),200);
 }
 
-// ── Вибрация ─────────────────────────────────────────────────────────
+// ── Вибрация ─────────────────────────────────────────────────────────────────
 function vibrate(ms){if(navigator.vibrate)navigator.vibrate(ms)}
 
-// ── Кнопка ripple ────────────────────────────────────────────────────────
+// ── Кнопка ripple ─────────────────────────────────────────────────────────────
 function ripple(el){
   el.classList.remove('ripple-anim');
   void el.offsetWidth;
@@ -462,7 +465,7 @@ function ripple(el){
   setTimeout(()=>el.classList.remove('ripple-anim'),400);
 }
 
-// ── Shake ─────────────────────────────────────────────────────────────
+// ── Shake ────────────────────────────────────────────────────────────────────
 function shakeApp(big){
   const a=document.getElementById('app');
   a.classList.remove('shake','shake-big');
@@ -471,7 +474,7 @@ function shakeApp(big){
   setTimeout(()=>a.classList.remove('shake','shake-big'),500);
 }
 
-// ── Board bounce ───────────────────────────────────────────────────────────
+// ── Board bounce ──────────────────────────────────────────────────────────────
 function bounceBoard(){
   const b=document.getElementById('board');
   b.classList.remove('bounce');
@@ -480,7 +483,7 @@ function bounceBoard(){
   setTimeout(()=>b.classList.remove('bounce'),230);
 }
 
-// ── Combo ring ───────────────────────────────────────────────────────────
+// ── Combo ring ────────────────────────────────────────────────────────────────
 function spawnComboRing(x,y,size){
   const el=document.createElement('div');
   el.className='combo-ring';
@@ -489,7 +492,7 @@ function spawnComboRing(x,y,size){
   setTimeout(()=>el.remove(),520);
 }
 
-// ── Streak bar ───────────────────────────────────────────────────────────
+// ── Streak bar ────────────────────────────────────────────────────────────────
 function updateStreak(){
   const maxCombo=8;
   const pct=Math.min(combo/maxCombo*100,100);
@@ -499,7 +502,7 @@ function updateStreak(){
   else fill.style.background='linear-gradient(90deg,var(--accent),var(--gold))';
 }
 
-// ── Drop trail ───────────────────────────────────────────────────────────
+// ── Drop trail ────────────────────────────────────────────────────────────────
 function showDropTrail(){
   const boardEl=document.getElementById('board');
   const ghost=getGhost();
@@ -532,27 +535,27 @@ function showLevelUp(lvl){
   vibrate([40,30,80]);
 }
 
-// ── Утилиты ──────────────────────────────────────────────────────────
+// ── Утилиты ───────────────────────────────────────────────────────────────────
 function $id(id){return document.getElementById(id)}
 function showScreen(id){
   ['menu','game','pause','gameover'].forEach(s=>{
     $id('screen-'+s).classList.toggle('hidden',s!==id);
   });
+  const rb=$id('rotate-btn');
+  if(rb)rb.style.display=(id==='game')?'flex':'none';
 }
 function calcCell(){
   // Измеряем реальную высоту элементов на экране
   const topBar=$id('top-bar');
-  const ctrlRow=$id('ctrl-row');
   const msgEl=$id('msg');
   const streakEl=$id('streak-bar');
 
   const topH=topBar?topBar.offsetHeight+4:36;
-  const ctrlH=ctrlRow?ctrlRow.offsetHeight+5:50;
   const msgH=msgEl?msgEl.offsetHeight+2:18;
   const streakH=streakEl?streakEl.offsetHeight+1:4;
-  const padV=10; // padding top+bottom игрового экрана
+  const padV=10;
 
-  const availH=window.innerHeight - topH - msgH - streakH - ctrlH - padV;
+  const availH=window.innerHeight - topH - msgH - streakH - padV;
   const availW=window.innerWidth - 70 - 16; // side(~62px) + gap(6px) + padding(8px*2)
 
   const byH=Math.floor(availH/ROWS);
@@ -605,7 +608,7 @@ function clearLines(){
   return count;
 }
 
-function getSpeed(){return Math.max(90,650-Math.floor(linesTotal/10)*55)}
+function getSpeed(){const base=Math.max(90,650-Math.floor(linesTotal/10)*55);return isFastDrop?Math.max(30,Math.round(base/3)):base}
 function getGhost(){let gy=curY;while(fits(current.shape,curX,gy+1))gy++;return{shape:current.shape,x:curX,y:gy}}
 
 function spawnNext(){
@@ -617,11 +620,14 @@ function spawnNext(){
   return true;
 }
 
+function checkTopReached(){for(let c=0;c<COLS;c++){if(board[0][c])return true;}return false;}
+
 function step(){
   if(gameOver||paused)return;
   if(fits(current.shape,curX,curY+1)){curY++}
   else{
     place();
+    if(checkTopReached()){triggerGameOver();return;}
     const lines=clearLines();
     if(lines>0){
       linesTotal+=lines;
@@ -713,7 +719,7 @@ function scheduleLoop(){
   if(!gameOver&&!paused)loopId=setTimeout(()=>{step();scheduleLoop()},getSpeed());
 }
 
-// ── Game Over анимация ──────────────────────────────────────────────────────
+// ── Game Over анимация ────────────────────────────────────────────────────────
 function triggerGameOver(){
   gameOver=true;clearTimeout(loopId);
   vibrate([80,40,80,40,200]);
@@ -768,7 +774,7 @@ function showGoCard(){
   }
 }
 
-// ── Рендер ───────────────────────────────────────────────────────────
+// ── Рендер ───────────────────────────────────────────────────────────────────
 function render(){
   const cells=$id('board').querySelectorAll('.cell');
   const ghost=getGhost();
@@ -820,7 +826,7 @@ function startGame(){
   $id('combo-panel').style.display='none';
   $id('go-overlay-content').classList.remove('show');
   $id('streak-fill').style.width='0%';
-  clearTimeout(loopId);particles=[];
+  clearTimeout(loopId);particles=[];isFastDrop=false;
   next=randPiece();
   showScreen('game'); // показываем экран ПЕРВЫМ, чтобы offsetHeight был реальным
   requestAnimationFrame(()=>{
@@ -868,26 +874,49 @@ function hardDrop(){
   if(dist>6)shakeApp(false);
 }
 
-const ctrlMap=[
-  ['cbtn-rotate',tryRotate],
-  ['cbtn-left',moveLeft],
-  ['cbtn-drop',hardDrop],
-  ['cbtn-right',moveRight],
-];
-ctrlMap.forEach(([id,fn])=>{
-  const el=$id(id);
-  el.addEventListener('touchstart',e=>{e.preventDefault();ripple(el);fn()},{passive:false});
-  el.addEventListener('click',()=>{ripple(el);fn()});
-});
+const rotBtn=$id('rotate-btn');
+rotBtn.addEventListener('touchstart',e=>{e.preventDefault();ripple(rotBtn);tryRotate()},{passive:false});
+rotBtn.addEventListener('click',()=>{ripple(rotBtn);tryRotate()});
 
-let tx=0,ty=0;
-document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
-document.addEventListener('touchend',e=>{
+let tx=0,ty=0,holdTimer=null,isFastDrop=false;
+
+function startFastDrop(){
+  if(gameOver||paused)return;
+  isFastDrop=true;
+  scheduleLoop();
+}
+function stopFastDrop(){
+  isFastDrop=false;
+}
+
+// Tap area: left half = move left, right half (excluding rotate btn) = move right
+// Hold anywhere = fast drop
+const gameAreaEl=$id('app');
+gameAreaEl.addEventListener('touchstart',e=>{
+  // Ignore touches on rotate button
+  if(e.target===rotBtn||rotBtn.contains(e.target))return;
+  tx=e.touches[0].clientX;ty=e.touches[0].clientY;
+  holdTimer=setTimeout(startFastDrop,150);
+},{passive:true});
+
+gameAreaEl.addEventListener('touchend',e=>{
+  if(e.target===rotBtn||rotBtn.contains(e.target))return;
+  clearTimeout(holdTimer);
+  const wasFast=isFastDrop;
+  stopFastDrop();
   const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
-  if(Math.abs(dx)<20&&Math.abs(dy)<20)return;
+  if(wasFast)return;
+  if(Math.abs(dx)<18&&Math.abs(dy)<18){
+    // Tap: left half = left, right half = right
+    if(e.changedTouches[0].clientX<window.innerWidth/2)moveLeft();
+    else moveRight();
+    return;
+  }
   if(Math.abs(dy)>Math.abs(dx)){if(dy>0)hardDrop();}
   else{if(dx<0)moveLeft();else moveRight();}
 },{passive:true});
+
+gameAreaEl.addEventListener('touchcancel',()=>{clearTimeout(holdTimer);stopFastDrop();},{passive:true});
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){if(!gameOver)togglePause();return}
